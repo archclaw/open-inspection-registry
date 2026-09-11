@@ -13,8 +13,11 @@ inspection intent can be a registered `skill`, a free-form `user_skill`, or a `p
 
 ### First call in three steps
 
-1. Obtain `<YOUR_API_BASE_URL>` from the service provider. This repository intentionally does
-   not publish a real service URL or API key.
+1. Obtain `<YOUR_API_BASE_URL>` from the service provider. For an API Management deployment,
+   this value includes the gateway host and the configured API suffix, for example
+   `<YOUR_API_GATEWAY_URL>/<YOUR_API_SUFFIX>`. Replace the whole placeholder once; do not append
+   the suffix a second time. This repository intentionally does not publish a real service URL
+   or API key.
 2. Choose an endpoint: use `analyze-upload` for a local file, `analyze` for image URLs with an
    observation set, or `analyze-template` for image URLs with a template.
 3. Send a `user_skill` or `prompt` describing what to inspect, then read `inspection_result` and
@@ -64,7 +67,8 @@ general inspection template.
 
 ### REST API
 
-Replace `<YOUR_API_BASE_URL>` with the service URL provided for your deployment. Never add
+Replace `<YOUR_API_BASE_URL>` with the complete service URL for your deployment. For APIM, include
+the configured API suffix in this value and do not append it again. Never add
 API keys, SAS URLs, private image URLs, or production credentials to this repository.
 
 Analyze one to three images by URL with an observation set:
