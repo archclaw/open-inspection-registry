@@ -67,6 +67,68 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 
 模板管理接口只允许管理员使用。
 
+## 示例：5S 现场巡检
+
+假设你有一张本地图片：
+
+```text
+./images/work-area.jpg
+```
+
+第一步，向服务管理员获取 API 基地址，并替换下面的 `<YOUR_API_BASE_URL>`。公开仓库不
+提供真实服务地址或 API key。
+
+第二步，使用上传接口发送图片。这个接口适合本地图片文件：
+
+```bash
+curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-upload' \
+  -F 'files=@./images/work-area.jpg' \
+  -F 'observation_set=manufacturing_quality_basic' \
+  -F 'user_skill=检查现场5S：整理、整顿、清扫、清洁和素养，指出图片中可见的问题。'
+```
+
+服务会返回每张图片的 observations 和一句最终 finding。例如：
+
+```json
+{
+  "inspection_result": {
+    "finding": "图片显示工作区域存在物品摆放不整齐和清洁不足的问题。"
+  },
+  "image_results": [
+    {
+      "index": 1,
+      "observations": {
+        "cleanliness": "needs_attention",
+        "surface_damage": "unknown"
+      }
+    }
+  ]
+}
+```
+
+当前模板列表中还没有专门的 `5s_inspection` 模板。上面的方式可以先使用自由文本获得
+5S 反馈，但返回的结构化字段取决于所选 `observation_set`。如果需要固定的 5S 字段，
+请按照 [SKILL.md](SKILL.md) 提交新的 field/checkpoint Issue，由维护者创建或发布对应模板。
+
+如果图片已经有可访问的 URL，可以使用模板接口：
+
+```bash
+curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-template' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "image_urls": ["<IMAGE_URL_1>"],
+    "template_slug": "general_inspection",
+    "user_skill": "检查图片中的5S现场管理问题。"
+  }'
+```
+
+简单选择：
+
+- 本地图片文件：使用 `/v1/inspections:analyze-upload`
+- 图片 URL + 模板：使用 `/v1/inspections:analyze-template`
+- 图片 URL + observation set：使用 `/v1/inspections:analyze`
+- MCP 客户端：调用 `analyze_inspection`
+
 ## MCP
 
 Streamable HTTP MCP 地址为：

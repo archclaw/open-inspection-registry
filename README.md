@@ -73,6 +73,69 @@ Public REST endpoints:
 
 Template administration endpoints are restricted to administrators.
 
+### Example: 5S inspection
+
+Suppose you have a local image:
+
+```text
+./images/work-area.jpg
+```
+
+Ask the service administrator for the API base URL and replace `<YOUR_API_BASE_URL>` below.
+This public repository intentionally does not provide a real service URL or API key.
+
+For a local image file, use the upload endpoint:
+
+```bash
+curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-upload' \
+  -F 'files=@./images/work-area.jpg' \
+  -F 'observation_set=manufacturing_quality_basic' \
+  -F 'user_skill=Inspect the visible 5S conditions: sort, set in order, shine, standardize, and sustain.'
+```
+
+The response contains per-image observations and one final finding:
+
+```json
+{
+  "inspection_result": {
+    "finding": "The work area shows visible disorder and insufficient cleanliness."
+  },
+  "image_results": [
+    {
+      "index": 1,
+      "observations": {
+        "cleanliness": "needs_attention",
+        "surface_damage": "unknown"
+      }
+    }
+  ]
+}
+```
+
+There is currently no dedicated `5s_inspection` template. This approach can provide a 5S
+feedback sentence using a free-form skill, while structured fields depend on the selected
+observation set. To request fixed 5S fields, follow [SKILL.md](SKILL.md) and submit an Issue
+using its field/checkpoint format.
+
+If the image already has an accessible URL, use the template endpoint:
+
+```bash
+curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-template' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "image_urls": ["<IMAGE_URL_1>"],
+    "template_slug": "general_inspection",
+    "user_skill": "Inspect the visible 5S workplace-management issues."
+  }'
+```
+
+Use this quick guide:
+
+- Local image file: `/v1/inspections:analyze-upload`
+- Image URL with a template: `/v1/inspections:analyze-template`
+- Image URL with an observation set: `/v1/inspections:analyze`
+- MCP client: call `analyze_inspection`
+
 ### MCP
 
 The Streamable HTTP MCP endpoint is:
