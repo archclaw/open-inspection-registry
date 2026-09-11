@@ -28,7 +28,8 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 
 ## REST API
 
-将 `<YOUR_API_BASE_URL>` 替换为你的服务地址。不要在公开仓库中加入 API key、
+将 `<YOUR_API_BASE_URL>` 替换为完整的服务地址。如果使用 APIM，请把配置的 API suffix 一并
+放入这个值，不要重复追加。不要在公开仓库中加入 API key、
 SAS URL、私人图片 URL 或生产环境凭据。
 
 服务一次接受一到三张图片。图片可以通过 URL 或 Base64 内容发送。巡检意图可以使用已经
@@ -36,7 +37,9 @@ SAS URL、私人图片 URL 或生产环境凭据。
 
 ## 第一次调用：只需要三步
 
-1. 获取你的服务地址并替换 `<YOUR_API_BASE_URL>`。本公开仓库不会提供真实服务地址或 API key。
+1. 获取你的服务地址并替换 `<YOUR_API_BASE_URL>`。如果服务通过 API Management 发布，这个
+   值应包含 gateway 地址和配置的 API suffix，例如 `<YOUR_API_GATEWAY_URL>/<YOUR_API_SUFFIX>`。
+   请一次性替换完整占位符，不要重复追加 suffix。本公开仓库不会提供真实服务地址或 API key。
 2. 选择接口：本地文件使用 `analyze-upload`，图片 URL 加 observation set 使用 `analyze`，
    图片 URL 加模板使用 `analyze-template`。
 3. 使用 `user_skill` 或 `prompt` 描述要检查什么，然后读取返回结果中的
