@@ -104,7 +104,7 @@ The response contains per-image observations and one final finding:
     {
       "index": 1,
       "observations": {
-        "cleanliness": "needs_attention",
+        "cleanliness": "dirty",
         "surface_damage": "unknown"
       }
     }

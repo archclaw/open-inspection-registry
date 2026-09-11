@@ -98,7 +98,7 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-upload' \
     {
       "index": 1,
       "observations": {
-        "cleanliness": "needs_attention",
+        "cleanliness": "dirty",
         "surface_damage": "unknown"
       }
     }
