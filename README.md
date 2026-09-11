@@ -13,9 +13,25 @@ inspection intent can be a registered `skill`, a free-form `user_skill`, or a `p
 
 ### Current templates
 
-- `general_inspection`
-- `safety_inspection`
-- `quality_inspection`
+- `general_inspection`: General image inspection. Use it when the inspection type is unknown
+  or when you need a broad visual review.
+  - `image_summary`: visible scene and main objects
+  - `visible_safety_issue`: visible hazard or missing protection
+  - `visible_quality_issue`: visible damage, dirt, defect, or workmanship issue
+  - `text_or_label`: readable text, labels, or signs
+  - `overall_condition`: `acceptable`, `needs_attention`, or `unknown`
+- `safety_inspection`: Workplace safety inspection, especially visible PPE and hazards.
+  - `helmet_status`: `compliant`, `missing`, `worn_incorrectly`, `not_applicable`, or `unknown`
+  - `gloves_status`: `compliant`, `missing`, `worn_incorrectly`, `not_applicable`, or `unknown`
+  - `harness_status`: `compliant`, `missing`, `disconnected`, `not_applicable`, or `unknown`
+  - `safety_hazard`: visible safety hazard description
+  - `safety_summary`: short safety finding
+- `quality_inspection`: Product, surface, and workmanship quality inspection.
+  - `surface_damage`: `none`, `minor`, `major`, or `unknown`
+  - `cleanliness`: `clean`, `dirty`, or `unknown`
+  - `label_status`: `present`, `missing`, `damaged`, or `unknown`
+  - `workmanship_issue`: visible assembly or workmanship issue
+  - `quality_summary`: short quality finding
 
 Pass a template as `template_slug`. If it is omitted or unavailable, the service uses the
 general inspection template.

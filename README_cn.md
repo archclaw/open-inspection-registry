@@ -5,9 +5,24 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 
 ## 当前模板
 
-- `general_inspection`：通用图像巡检
-- `safety_inspection`：安全巡检
-- `quality_inspection`：质量巡检
+- `general_inspection`：通用图像巡检。适合不知道检查类型，或需要进行全面图像检查的场景。
+  - `image_summary`：图片场景和主要物体概述
+  - `visible_safety_issue`：可见安全隐患或防护缺失
+  - `visible_quality_issue`：可见损坏、污渍、缺陷或施工问题
+  - `text_or_label`：图片中可读的文字、标签或标牌
+  - `overall_condition`：`acceptable`、`needs_attention` 或 `unknown`
+- `safety_inspection`：安全巡检，重点检查可见的个人防护装备和现场隐患。
+  - `helmet_status`：`compliant`、`missing`、`worn_incorrectly`、`not_applicable` 或 `unknown`
+  - `gloves_status`：`compliant`、`missing`、`worn_incorrectly`、`not_applicable` 或 `unknown`
+  - `harness_status`：`compliant`、`missing`、`disconnected`、`not_applicable` 或 `unknown`
+  - `safety_hazard`：可见安全隐患描述
+  - `safety_summary`：简短的安全检查结论
+- `quality_inspection`：质量巡检，适合产品、表面和施工工艺检查。
+  - `surface_damage`：`none`、`minor`、`major` 或 `unknown`
+  - `cleanliness`：`clean`、`dirty` 或 `unknown`
+  - `label_status`：`present`、`missing`、`damaged` 或 `unknown`
+  - `workmanship_issue`：可见装配或施工工艺问题
+  - `quality_summary`：简短的质量检查结论
 
 通过 `template_slug` 指定模板。如果不填写，或者模板不可用，服务会使用通用巡检模板。
 
