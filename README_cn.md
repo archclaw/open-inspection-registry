@@ -28,7 +28,7 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 
 ## REST API
 
-将 `<YOUR_API_BASE_URL>` 替换为管理员提供的服务地址。不要在公开仓库中加入 API key、
+将 `<YOUR_API_BASE_URL>` 替换为你的服务地址。不要在公开仓库中加入 API key、
 SAS URL、私人图片 URL 或生产环境凭据。
 
 服务一次接受一到三张图片。图片可以通过 URL 或 Base64 内容发送。巡检意图可以使用已经
@@ -36,12 +36,11 @@ SAS URL、私人图片 URL 或生产环境凭据。
 
 ## 第一次调用：只需要三步
 
-1. 向服务管理员获取 `<YOUR_API_BASE_URL>`。本公开仓库不会提供真实服务地址或 API key。
+1. 获取你的服务地址并替换 `<YOUR_API_BASE_URL>`。本公开仓库不会提供真实服务地址或 API key。
 2. 选择接口：本地文件使用 `analyze-upload`，图片 URL 加 observation set 使用 `analyze`，
    图片 URL 加模板使用 `analyze-template`。
 3. 使用 `user_skill` 或 `prompt` 描述要检查什么，然后读取返回结果中的
-   `inspection_result` 和 `image_results`。只有在管理员提供了准确名称时，才使用已注册的
-   `skill`。
+   `inspection_result` 和 `image_results`。只有在你知道准确名称时，才使用已注册的 `skill`。
 
 ```mermaid
 flowchart LR
@@ -94,7 +93,7 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 本地图片文件可以使用 `/v1/inspections:analyze-upload`，提交一到三个 `files` 字段和
 `observation_set`。请求必须提供 `skill`、`user_skill` 或 `prompt` 其中之一。
 
-第一次调用建议使用 `user_skill` 或 `prompt`。已注册的 `skill` 名称需要由服务管理员提供，
+第一次调用建议使用 `user_skill` 或 `prompt`。只有在知道准确名称时才使用已注册的 `skill`，
 不能假设可以从这个公开 registry 自动获取。
 
 公开 REST API 包括：
@@ -109,8 +108,6 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 | `POST` | `/v1/inspections:analyze-template` | 使用模板分析图片 URL |
 | `POST` | `/v1/inspections:analyze-upload` | 分析上传的图片文件 |
 
-模板管理接口只允许管理员使用。
-
 ## 示例：5S 现场巡检
 
 假设你有一张本地图片：
@@ -119,7 +116,7 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 ./images/work-area.jpg
 ```
 
-第一步，向服务管理员获取 API 基地址，并替换下面的 `<YOUR_API_BASE_URL>`。公开仓库不
+第一步，获取你的服务地址，并替换下面的 `<YOUR_API_BASE_URL>`。公开仓库不
 提供真实服务地址或 API key。
 
 第二步，使用上传接口发送图片。这个接口适合本地图片文件：

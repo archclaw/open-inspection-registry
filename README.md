@@ -13,13 +13,12 @@ inspection intent can be a registered `skill`, a free-form `user_skill`, or a `p
 
 ### First call in three steps
 
-1. Ask the service administrator for `<YOUR_API_BASE_URL>`. This repository intentionally does
+1. Obtain `<YOUR_API_BASE_URL>` from the service provider. This repository intentionally does
    not publish a real service URL or API key.
 2. Choose an endpoint: use `analyze-upload` for a local file, `analyze` for image URLs with an
    observation set, or `analyze-template` for image URLs with a template.
 3. Send a `user_skill` or `prompt` describing what to inspect, then read `inspection_result` and
-   `image_results`. Use a registered `skill` only when the administrator has given you its exact
-   name.
+   `image_results`. Use a registered `skill` only when you have its exact name.
 
 ```mermaid
 flowchart LR
@@ -65,7 +64,7 @@ general inspection template.
 
 ### REST API
 
-Replace `<YOUR_API_BASE_URL>` with the service URL provided by your administrator. Never add
+Replace `<YOUR_API_BASE_URL>` with the service URL provided for your deployment. Never add
 API keys, SAS URLs, private image URLs, or production credentials to this repository.
 
 Analyze one to three images by URL with an observation set:
@@ -102,8 +101,8 @@ To select a ready template, use `/v1/inspections:analyze-template`:
 For local image files, use `/v1/inspections:analyze-upload` with one to three `files` fields
 and an `observation_set`. The request must include one of `skill`, `user_skill`, or `prompt`.
 
-For a first request, use `user_skill` or `prompt`. Registered `skill` names are supplied by the
-service administrator and are not assumed to be discoverable from this public registry.
+For a first request, use `user_skill` or `prompt`. Use a registered `skill` only when you know
+its exact name; skill names are not assumed to be discoverable from this public registry.
 
 Public REST endpoints:
 
@@ -117,8 +116,6 @@ Public REST endpoints:
 | `POST` | `/v1/inspections:analyze-template` | Analyze image URLs with a template |
 | `POST` | `/v1/inspections:analyze-upload` | Analyze uploaded image files |
 
-Template administration endpoints are restricted to administrators.
-
 ### Example: 5S inspection
 
 Suppose you have a local image:
@@ -127,7 +124,7 @@ Suppose you have a local image:
 ./images/work-area.jpg
 ```
 
-Ask the service administrator for the API base URL and replace `<YOUR_API_BASE_URL>` below.
+Obtain the API base URL for your deployment and replace `<YOUR_API_BASE_URL>` below.
 This public repository intentionally does not provide a real service URL or API key.
 
 For a local image file, use the upload endpoint:
