@@ -34,6 +34,32 @@ SAS URL、私人图片 URL 或生产环境凭据。
 服务一次接受一到三张图片。图片可以通过 URL 或 Base64 内容发送。巡检意图可以使用已经
 注册的 `skill`、自由文本 `user_skill`，或者 `prompt`。
 
+## 第一次调用：只需要三步
+
+1. 向服务管理员获取 `<YOUR_API_BASE_URL>`。本公开仓库不会提供真实服务地址或 API key。
+2. 选择接口：本地文件使用 `analyze-upload`，图片 URL 加 observation set 使用 `analyze`，
+   图片 URL 加模板使用 `analyze-template`。
+3. 使用 `user_skill` 或 `prompt` 描述要检查什么，然后读取返回结果中的
+   `inspection_result` 和 `image_results`。只有在管理员提供了准确名称时，才使用已注册的
+   `skill`。
+
+```mermaid
+flowchart LR
+    A[本地图片或图片 URL] --> B{选择输入方式}
+    B -->|本地文件| C[REST analyze-upload]
+    B -->|URL + observation set| D[REST analyze]
+    B -->|URL + 模板| E[REST analyze-template]
+    B -->|MCP 客户端| F[MCP analyze_inspection]
+    C --> G[巡检服务]
+    D --> G
+    E --> G
+    F --> G
+    G --> H[模板 + skill 或 prompt]
+    H --> I[图片证据分析]
+    I --> J[结构化 observations]
+    J --> K[一句最终 finding]
+```
+
 通过图片 URL 和 observation set 分析一到三张图片：
 
 ```bash
@@ -67,6 +93,9 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 
 本地图片文件可以使用 `/v1/inspections:analyze-upload`，提交一到三个 `files` 字段和
 `observation_set`。请求必须提供 `skill`、`user_skill` 或 `prompt` 其中之一。
+
+第一次调用建议使用 `user_skill` 或 `prompt`。已注册的 `skill` 名称需要由服务管理员提供，
+不能假设可以从这个公开 registry 自动获取。
 
 公开 REST API 包括：
 
