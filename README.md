@@ -23,14 +23,14 @@ general inspection template.
 Replace `<YOUR_API_BASE_URL>` with the service URL provided by your administrator. Never add
 API keys, SAS URLs, private image URLs, or production credentials to this repository.
 
-Analyze one to three images by URL:
+Analyze one to three images by URL with an observation set:
 
 ```bash
 curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
-    "template_slug": "quality_inspection",
+    "observation_set": "manufacturing_quality_basic",
     "prompt": "Check visible labels, cleanliness, and surface damage."
   }'
 ```
@@ -44,8 +44,32 @@ The legacy single-image form is also supported:
 }
 ```
 
-For local image files, use `/v1/inspections:analyze-upload` with one to three `files` fields.
-The request must include one of `skill`, `user_skill`, or `prompt`.
+To select a ready template, use `/v1/inspections:analyze-template`:
+
+```json
+{
+  "image_urls": ["<IMAGE_URL_1>"],
+  "template_slug": "quality_inspection",
+  "prompt": "Check visible labels, cleanliness, and surface damage."
+}
+```
+
+For local image files, use `/v1/inspections:analyze-upload` with one to three `files` fields
+and an `observation_set`. The request must include one of `skill`, `user_skill`, or `prompt`.
+
+Public REST endpoints:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/healthz` | Service health check |
+| `GET` | `/v1/registry/observation-sets` | List built-in observation sets |
+| `GET` | `/v1/templates` | List ready templates |
+| `GET` | `/v1/templates/{slug}` | Read one template |
+| `POST` | `/v1/inspections:analyze` | Analyze image URLs with an observation set |
+| `POST` | `/v1/inspections:analyze-template` | Analyze image URLs with a template |
+| `POST` | `/v1/inspections:analyze-upload` | Analyze uploaded image files |
+
+Template administration endpoints are restricted to administrators.
 
 ### MCP
 
@@ -66,8 +90,7 @@ The MCP tool is `analyze_inspection`:
 ```
 
 Use `images_base64` instead of `image_urls` when sending image bytes. Provide exactly one of
-these two input forms. REST and MCP support `template_slug`, `skill`, `user_skill`, and
-`prompt`.
+these two input forms. MCP supports `template_slug`, `skill`, `user_skill`, and `prompt`.
 
 ### Response example
 
@@ -122,14 +145,14 @@ Open Inspection Registry 是一个公开的图像巡检模板、观察项和 Ski
 将 `<YOUR_API_BASE_URL>` 替换为管理员提供的服务地址。不要在公开仓库中加入 API key、
 SAS URL、私人图片 URL 或生产环境凭据。
 
-通过图片 URL 分析一到三张图片：
+通过图片 URL 和 observation set 分析一到三张图片：
 
 ```bash
 curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
-    "template_slug": "quality_inspection",
+    "observation_set": "manufacturing_quality_basic",
     "prompt": "检查可见的标签、清洁度和表面损坏。"
   }'
 ```
@@ -143,8 +166,32 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 }
 ```
 
-本地图片文件可以使用 `/v1/inspections:analyze-upload`，提交一到三个 `files` 字段。
-请求必须提供 `skill`、`user_skill` 或 `prompt` 其中之一。
+如果要选择已经准备好的模板，请使用 `/v1/inspections:analyze-template`：
+
+```json
+{
+  "image_urls": ["<IMAGE_URL_1>"],
+  "template_slug": "quality_inspection",
+  "prompt": "检查可见的标签、清洁度和表面损坏。"
+}
+```
+
+本地图片文件可以使用 `/v1/inspections:analyze-upload`，提交一到三个 `files` 字段和
+`observation_set`。请求必须提供 `skill`、`user_skill` 或 `prompt` 其中之一。
+
+公开 REST API 包括：
+
+| 方法 | 路径 | 用途 |
+| --- | --- | --- |
+| `GET` | `/healthz` | 健康检查 |
+| `GET` | `/v1/registry/observation-sets` | 读取内置 observation set |
+| `GET` | `/v1/templates` | 读取可用模板列表 |
+| `GET` | `/v1/templates/{slug}` | 读取单个模板 |
+| `POST` | `/v1/inspections:analyze` | 使用 observation set 分析图片 URL |
+| `POST` | `/v1/inspections:analyze-template` | 使用模板分析图片 URL |
+| `POST` | `/v1/inspections:analyze-upload` | 分析上传的图片文件 |
+
+模板管理接口只允许管理员使用。
 
 ### MCP
 
@@ -165,7 +212,7 @@ MCP tool 名称为 `analyze_inspection`：
 ```
 
 如果直接发送图片内容，可以使用 `images_base64` 代替 `image_urls`。两者必须二选一。
-REST 和 MCP 都支持 `template_slug`、`skill`、`user_skill` 和 `prompt`。
+MCP 支持 `template_slug`、`skill`、`user_skill` 和 `prompt`。
 
 ### 输出示例
 
