@@ -10,6 +10,13 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 - **Template**：可直接使用的巡检配置，把 observation set 和可重复的巡检流程组合起来。
 - **Skill**：用户想完成的巡检目标。普通用户通过 `user_skill` 提供这个目标。
 
+例如，`helmet_status` 是一个 **Observation**，用于检查图片中可见的安全帽状态，可能返回
+`compliant`、`missing` 或 `unknown`。面向安全巡检的 **Observation Set** 可以把
+`helmet_status`、`gloves_status`、`harness_status` 和 `safety_hazard` 组合在一起，让 API
+一次返回这些结构化字段。`safety_inspection` 这样的 **Template** 是可以直接使用的完整巡检
+配置，负责选择相关字段和巡检流程。`user_skill` 则是本次请求想检查的目标，例如“检查图片中
+是否能看到必要的个人防护装备”。
+
 如果现有 observation 无法覆盖你的场景，请先按照 [SKILL.md](SKILL.md) 提交 GitHub Issue。
 由 owner 审核需求；审核通过后，维护者可以把新 observation 加入现有 template。普通用户
 不需要自行发布 template。

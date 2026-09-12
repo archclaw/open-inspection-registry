@@ -21,6 +21,14 @@ request should provide a `user_skill` describing what to inspect.
 - A **Skill** describes the user's inspection goal. For normal use, provide that goal as
   `user_skill`.
 
+For example, `helmet_status` is an **Observation**: it checks the visible helmet status in an
+image and may return values such as `compliant`, `missing`, or `unknown`. A safety-focused
+**Observation Set** can group `helmet_status`, `gloves_status`, `harness_status`, and
+`safety_hazard`, so the API returns those structured fields together. A **Template** such as
+`safety_inspection` is the ready-to-use inspection configuration that selects the relevant fields
+and workflow. The `user_skill` is your request for this call, for example: “Check whether the
+required protective equipment is visible.”
+
 If the existing observations do not cover your use case, first submit an Issue using
 [SKILL.md](SKILL.md). The owner reviews the proposal; after approval, the maintainer can add the
 new observation to an existing template. You do not need to publish a template yourself.
