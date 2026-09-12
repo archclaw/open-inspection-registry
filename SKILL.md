@@ -11,8 +11,10 @@ Check existing templates and observations first. A new field is appropriate only
 current fields cannot express the requested checkpoint. The field must be observable from one
 to three images and work through the existing REST and MCP `analyze_inspection` inputs.
 
-Never submit secrets, customer images, private documents, real API URLs, SAS URLs, or
-credentials. Use placeholders or public, non-sensitive example references.
+Issue evidence images are for explaining the proposed field or template, not for running a
+customer inspection. Use public, synthetic, or fully anonymized example images. Never submit
+customer images, private images, confidential documents, private API URLs, SAS URLs, secrets, or
+credentials. A public link may be used instead of an upload.
 
 ## Required field format
 
@@ -78,13 +80,15 @@ Explain:
 1. What inspection problem the field solves.
 2. Why existing fields or templates are insufficient.
 3. The proposed field ID, type, and allowed values.
-4. Positive and negative visual evidence.
-5. At least three positive and three negative example references.
-6. A REST or MCP request using `template_slug`, `skill`, `user_skill`, or `prompt`.
-7. A sample response showing the expected observation value.
+4. At least one positive and one negative example image, or a public link to each. These examples
+   should make the proposed field's visual boundary clear. More examples are welcome.
+5. A REST or MCP request using `template_slug` and `user_skill`.
+6. A sample response showing the expected observation value.
 
 Maintainers may revise names, values, examples, or template membership to keep the registry
-consistent and backward compatible.
+consistent and backward compatible. Before merging a new observation into the registry,
+maintainers may ask for or add enough examples to reach at least three positive and three
+negative references.
 
 ## 中文
 
@@ -99,8 +103,9 @@ consistent and backward compatible.
 必须能够从一到三张图片中观察，并且能够通过现有 REST API 或 MCP 的
 `analyze_inspection` 使用。
 
-绝对不要提交密钥、客户图片、私有文件、真实 API 地址、SAS URL 或凭据。示例请使用占位符
-或公开且无敏感信息的引用。
+Issue 中的图片用于解释新字段或模板，不是客户巡检输入。请使用公开、合成或已完全匿名化的
+示例图片，也可以使用公开链接代替上传。绝对不要提交客户图片、私人图片、机密文件、私人
+API 地址、SAS URL、密钥或凭据。
 
 ### 必填字段格式
 
@@ -165,10 +170,11 @@ Skill 应描述用户的巡检意图，不能创造所选观察项无法从图�
 1. 新字段解决什么巡检问题。
 2. 为什么现有字段或模板不够用。
 3. 建议的字段 ID、类型和允许值。
-4. 什么图片证据属于正面或反面结果。
-5. 至少三个正面和三个反面示例引用。
-6. 一个使用 `template_slug`、`skill`、`user_skill` 或 `prompt` 的 REST/MCP 请求示例。
-7. 一个展示预期 observation 值的响应示例。
+4. 哪一张示例图片属于正面结果，哪一张属于反面结果，以及它们如何说明字段边界。
+5. 至少一个正面和一个反面示例引用，欢迎提供更多示例。
+5. 一个使用 `template_slug` 和 `user_skill` 的 REST/MCP 请求示例。
+6. 一个展示预期 observation 值的响应示例。
 
 维护者可以为了保持公开 registry 的一致性和向后兼容性，调整字段名称、允许值、示例或
-模板归属。
+模板归属。字段正式加入 registry 前，维护者可能会补充或要求至少三个正面和三个反面
+示例引用。

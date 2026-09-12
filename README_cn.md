@@ -3,6 +3,17 @@
 Open Inspection Registry 是一个公开的图像巡检模板、观察项和 Skill 目录。它帮助用户向
 Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于图片证据的结构化结果。
 
+## Registry 对象模型
+
+- **Observation**：一个要从图片中检查的视觉事实，例如 `cleanliness` 或 `label_status`。
+- **Observation Set**：面向某个场景的一组 observations，决定 API 返回哪些结构化字段。
+- **Template**：可直接使用的巡检配置，把 observation set 和可重复的巡检流程组合起来。
+- **Skill**：用户想完成的巡检目标。普通用户通过 `user_skill` 提供这个目标。
+
+如果现有 observation 无法覆盖你的场景，请先按照 [SKILL.md](SKILL.md) 提交 GitHub Issue。
+由 owner 审核需求；审核通过后，维护者可以把新 observation 加入现有 template。普通用户
+不需要自行发布 template。
+
 ## 当前模板
 
 - `general_inspection`：通用图像巡检。适合不知道检查类型，或需要进行全面图像检查的场景。
@@ -28,22 +39,27 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 
 ## REST API
 
-将 `<YOUR_API_BASE_URL>` 替换为完整的服务地址。如果使用 APIM，请把配置的 API suffix 一并
-放入这个值，不要重复追加。不要在公开仓库中加入 API key、
+示例使用服务根地址 `https://mcp.azure-api.net/inspection`。不要在公开仓库中加入 API key、
 SAS URL、私人图片 URL 或生产环境凭据。
 
+## 图片安全与保留
+
+Inspection Agent Engine 后端服务会在图片处理完成后删除上传的图片。生成的巡检结果最多保留
+24 小时供读取，之后自动删除。24 小时适用于结果，不适用于上传的图片。
+
+本服务自身也不会把上传文件持久化到本地磁盘或数据库。请确认你有权处理图片，并根据适用
+的隐私要求决定是否上传。
+
 服务一次接受一到三张图片。图片可以通过 URL 或 Base64 内容发送。巡检意图可以使用已经
-注册的 `skill`、自由文本 `user_skill`，或者 `prompt`。
+使用 `user_skill` 提供巡检目标。
 
 ## 第一次调用：只需要三步
 
-1. 获取你的服务地址并替换 `<YOUR_API_BASE_URL>`。如果服务通过 API Management 发布，这个
-   值应包含 gateway 地址和配置的 API suffix，例如 `<YOUR_API_GATEWAY_URL>/<YOUR_API_SUFFIX>`。
-   请一次性替换完整占位符，不要重复追加 suffix。本公开仓库不会提供真实服务地址或 API key。
+1. 使用服务根地址 `https://mcp.azure-api.net/inspection`。
 2. 选择接口：本地文件使用 `analyze-upload`，图片 URL 加 observation set 使用 `analyze`，
    图片 URL 加模板使用 `analyze-template`。
-3. 使用 `user_skill` 或 `prompt` 描述要检查什么，然后读取返回结果中的
-   `inspection_result` 和 `image_results`。只有在你知道准确名称时，才使用已注册的 `skill`。
+3. 使用 `user_skill` 描述要检查什么，然后读取返回结果中的 `inspection_result` 和
+   `image_results`。
 
 ```mermaid
 flowchart LR
@@ -56,7 +72,7 @@ flowchart LR
     D --> G
     E --> G
     F --> G
-    G --> H[模板 + skill 或 prompt]
+    G --> H[模板 + user_skill]
     H --> I[图片证据分析]
     I --> J[结构化 observations]
     J --> K[一句最终 finding]
@@ -65,12 +81,12 @@ flowchart LR
 通过图片 URL 和 observation set 分析一到三张图片：
 
 ```bash
-curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
     "observation_set": "manufacturing_quality_basic",
-    "prompt": "检查可见的标签、清洁度和表面损坏。"
+    "user_skill": "检查可见的标签、清洁度和表面损坏。"
   }'
 ```
 
@@ -89,15 +105,14 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 {
   "image_urls": ["<IMAGE_URL_1>"],
   "template_slug": "quality_inspection",
-  "prompt": "检查可见的标签、清洁度和表面损坏。"
+  "user_skill": "检查可见的标签、清洁度和表面损坏。"
 }
 ```
 
 本地图片文件可以使用 `/v1/inspections:analyze-upload`，提交一到三个 `files` 字段和
-`observation_set`。请求必须提供 `skill`、`user_skill` 或 `prompt` 其中之一。
+`observation_set`。请求必须提供 `user_skill`。
 
-第一次调用建议使用 `user_skill` 或 `prompt`。只有在知道准确名称时才使用已注册的 `skill`，
-不能假设可以从这个公开 registry 自动获取。
+第一次调用请使用 `user_skill` 描述巡检目标。
 
 公开 REST API 包括：
 
@@ -119,13 +134,10 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
 ./images/work-area.jpg
 ```
 
-第一步，获取你的服务地址，并替换下面的 `<YOUR_API_BASE_URL>`。公开仓库不
-提供真实服务地址或 API key。
-
-第二步，使用上传接口发送图片。这个接口适合本地图片文件：
+使用上传接口发送图片。这个接口适合本地图片文件：
 
 ```bash
-curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-upload' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
   -F 'observation_set=manufacturing_quality_basic' \
   -F 'user_skill=检查现场5S：整理、整顿、清扫、清洁和素养，指出图片中可见的问题。'
@@ -157,7 +169,7 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-upload' \
 如果图片已经有可访问的 URL，可以使用模板接口：
 
 ```bash
-curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-template' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>"],
@@ -178,7 +190,7 @@ curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-template' \
 Streamable HTTP MCP 地址为：
 
 ```text
-<YOUR_API_BASE_URL>/mcp/
+https://mcp.azure-api.net/inspection/mcp/
 ```
 
 MCP tool 名称为 `analyze_inspection`：
@@ -192,7 +204,7 @@ MCP tool 名称为 `analyze_inspection`：
 ```
 
 如果直接发送图片内容，可以使用 `images_base64` 代替 `image_urls`。两者必须二选一。
-MCP 支持 `template_slug`、`skill`、`user_skill` 和 `prompt`。
+MCP 支持 `template_slug` 和 `user_skill`。
 
 ## 输出示例
 
@@ -227,11 +239,12 @@ GitHub Issue。Issue 至少应说明：
 1. 要解决的巡检问题。
 2. 现有字段或模板为什么不够用。
 3. 新字段的 `id`、`type` 和允许值。
-4. 正面和反面的图片证据。
-5. 至少三个正面和三个反面示例引用。
-6. 一个 REST 或 MCP 请求示例。
-7. 一个预期响应示例。
+4. 至少提供一张正面和一张反面示例图片，或公开示例链接。这些图片用于解释新字段或模板，
+   不是客户巡检输入。请使用公开、合成或已完全匿名化且不含机密内容的示例图片，欢迎提供
+   更多示例。
+5. 一个 REST 或 MCP 请求示例。
+6. 一个预期响应示例。
 
-不要提交客户图片、机密文件、真实服务地址、API key、SAS URL 或其他秘密信息。
+不要提交客户图片、私人图片、机密文件、私人服务地址、API key、SAS URL 或其他秘密信息。
 
 [English README](README.md)

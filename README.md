@@ -8,20 +8,30 @@ Open Inspection Registry is a public catalog of reusable image-inspection templa
 observations, and skills. It helps users send images and an inspection intent to an Open
 Inspection API or MCP server and receive structured, evidence-based results.
 
-The service accepts one to three images. You can send image URLs or Base64 image content. Your
-inspection intent can be a registered `skill`, a free-form `user_skill`, or a `prompt`.
+The service accepts one to three images. You can send image URLs or Base64 image content. Each
+request should provide a `user_skill` describing what to inspect.
+
+### Registry object model
+
+- An **Observation** is one visual fact to check, such as `cleanliness` or `label_status`.
+- An **Observation Set** groups observations for a use case and controls the structured fields
+  returned by the API.
+- A **Template** is a ready-to-use inspection configuration that combines an observation set with
+  a repeatable inspection workflow.
+- A **Skill** describes the user's inspection goal. For normal use, provide that goal as
+  `user_skill`.
+
+If the existing observations do not cover your use case, first submit an Issue using
+[SKILL.md](SKILL.md). The owner reviews the proposal; after approval, the maintainer can add the
+new observation to an existing template. You do not need to publish a template yourself.
 
 ### First call in three steps
 
-1. Obtain `<YOUR_API_BASE_URL>` from the service provider. For an API Management deployment,
-   this value includes the gateway host and the configured API suffix, for example
-   `<YOUR_API_GATEWAY_URL>/<YOUR_API_SUFFIX>`. Replace the whole placeholder once; do not append
-   the suffix a second time. This repository intentionally does not publish a real service URL
-   or API key.
+1. Use the service root URL: `https://mcp.azure-api.net/inspection`.
 2. Choose an endpoint: use `analyze-upload` for a local file, `analyze` for image URLs with an
    observation set, or `analyze-template` for image URLs with a template.
-3. Send a `user_skill` or `prompt` describing what to inspect, then read `inspection_result` and
-   `image_results`. Use a registered `skill` only when you have its exact name.
+3. Send a `user_skill` describing what to inspect, then read `inspection_result` and
+   `image_results`.
 
 ```mermaid
 flowchart LR
@@ -34,7 +44,7 @@ flowchart LR
     D --> G
     E --> G
     F --> G
-    G --> H[Template + skill or prompt]
+    G --> H[Template + user_skill]
     H --> I[Image evidence analysis]
     I --> J[Structured observations]
     J --> K[One-sentence finding]
@@ -67,19 +77,28 @@ general inspection template.
 
 ### REST API
 
-Replace `<YOUR_API_BASE_URL>` with the complete service URL for your deployment. For APIM, include
-the configured API suffix in this value and do not append it again. Never add
-API keys, SAS URLs, private image URLs, or production credentials to this repository.
+The examples use the service root URL `https://mcp.azure-api.net/inspection`. Never add API keys,
+SAS URLs, private image URLs, or production credentials to this repository.
+
+### Image privacy and retention
+
+The inspection agent engine backend service deletes uploaded images after processing completes.
+The generated inspection result may be retained for up to 24 hours for retrieval and is then
+automatically deleted. The 24-hour period applies to the result, not the uploaded image.
+
+This service also does not persist uploaded files in its own local disk or database. Do not upload
+images unless you have the right to process them and have considered applicable privacy
+requirements.
 
 Analyze one to three images by URL with an observation set:
 
 ```bash
-curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
     "observation_set": "manufacturing_quality_basic",
-    "prompt": "Check visible labels, cleanliness, and surface damage."
+    "user_skill": "Check visible labels, cleanliness, and surface damage."
   }'
 ```
 
@@ -98,15 +117,14 @@ To select a ready template, use `/v1/inspections:analyze-template`:
 {
   "image_urls": ["<IMAGE_URL_1>"],
   "template_slug": "quality_inspection",
-  "prompt": "Check visible labels, cleanliness, and surface damage."
+  "user_skill": "Check visible labels, cleanliness, and surface damage."
 }
 ```
 
 For local image files, use `/v1/inspections:analyze-upload` with one to three `files` fields
-and an `observation_set`. The request must include one of `skill`, `user_skill`, or `prompt`.
+and an `observation_set`. The request must include a `user_skill`.
 
-For a first request, use `user_skill` or `prompt`. Use a registered `skill` only when you know
-its exact name; skill names are not assumed to be discoverable from this public registry.
+For a first request, use a `user_skill` to describe the inspection goal.
 
 Public REST endpoints:
 
@@ -128,13 +146,10 @@ Suppose you have a local image:
 ./images/work-area.jpg
 ```
 
-Obtain the API base URL for your deployment and replace `<YOUR_API_BASE_URL>` below.
-This public repository intentionally does not provide a real service URL or API key.
-
 For a local image file, use the upload endpoint:
 
 ```bash
-curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-upload' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
   -F 'observation_set=manufacturing_quality_basic' \
   -F 'user_skill=Inspect the visible 5S conditions: sort, set in order, shine, standardize, and sustain.'
@@ -167,7 +182,7 @@ using its field/checkpoint format.
 If the image already has an accessible URL, use the template endpoint:
 
 ```bash
-curl -X POST '<YOUR_API_BASE_URL>/v1/inspections:analyze-template' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>"],
@@ -188,7 +203,7 @@ Use this quick guide:
 The Streamable HTTP MCP endpoint is:
 
 ```text
-<YOUR_API_BASE_URL>/mcp/
+https://mcp.azure-api.net/inspection/mcp/
 ```
 
 The MCP tool is `analyze_inspection`:
@@ -202,7 +217,7 @@ The MCP tool is `analyze_inspection`:
 ```
 
 Use `images_base64` instead of `image_urls` when sending image bytes. Provide exactly one of
-these two input forms. MCP supports `template_slug`, `skill`, `user_skill`, and `prompt`.
+these two input forms. MCP supports `template_slug` and `user_skill`.
 
 ### Response example
 
@@ -234,4 +249,8 @@ image does not provide enough evidence.
 ### Contributing
 
 To propose a new inspection field or checkpoint, read [SKILL.md](SKILL.md). Do not submit
-customer images, confidential documents, real service URLs, API keys, SAS URLs, or secrets.
+customer images, confidential documents, private service URLs, API keys, SAS URLs, or secrets.
+An Issue should include at least one positive and one negative example image, or a link to a
+public example. These images explain the proposed field or template; they are not customer
+inspection inputs. Use public, synthetic, or fully anonymized examples with no confidential
+content. Maintainers may request or add more examples before merging the field.
