@@ -29,6 +29,8 @@ image and may return values such as `compliant`, `missing`, or `unknown`. A safe
 and workflow. The `user_skill` is your request for this call, for example: “Check whether the
 required protective equipment is visible.”
 
+![Safety inspection registry object model](output/imagegen/safety-inspection-object-model.png)
+
 If the existing observations do not cover your use case, first submit an Issue using
 [SKILL.md](SKILL.md). The owner reviews the proposal; after approval, the maintainer can add the
 new observation to an existing template. You do not need to publish a template yourself.

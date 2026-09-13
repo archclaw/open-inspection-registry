@@ -17,6 +17,8 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 配置，负责选择相关字段和巡检流程。`user_skill` 则是本次请求想检查的目标，例如“检查图片中
 是否能看到必要的个人防护装备”。
 
+![安全巡检 Registry 对象模型](output/imagegen/safety-inspection-object-model.png)
+
 如果现有 observation 无法覆盖你的场景，请先按照 [SKILL.md](SKILL.md) 提交 GitHub Issue。
 由 owner 审核需求；审核通过后，维护者可以把新 observation 加入现有 template。普通用户
 不需要自行发布 template。
