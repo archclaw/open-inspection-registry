@@ -14,10 +14,11 @@ request should provide a `user_skill` describing what to inspect.
 ### Registry object model
 
 - An **Observation** is one visual fact to check, such as `cleanliness` or `label_status`.
-- An **Observation Set** groups observations for a use case and controls the structured fields
-  returned by the API.
-- A **Template** is a ready-to-use inspection configuration that combines an observation set with
-  a repeatable inspection workflow.
+- An **Observation Set** is the registry-level group of observations for a use case. It defines
+  which structured fields can be returned together.
+- A **Template** is the user-facing, ready-to-use inspection choice. You can think of it as an
+  Observation Set packaged with a repeatable workflow. Internally, each ready template maps to a
+  versioned analyzer configuration; users do not need to know or manage that internal ID.
 - A **Skill** describes the user's inspection goal. For normal use, provide that goal as
   `user_skill`.
 
@@ -25,9 +26,9 @@ For example, `helmet_status` is an **Observation**: it checks the visible helmet
 image and may return values such as `compliant`, `missing`, or `unknown`. A safety-focused
 **Observation Set** can group `helmet_status`, `gloves_status`, `harness_status`, and
 `safety_hazard`, so the API returns those structured fields together. A **Template** such as
-`safety_inspection` is the ready-to-use inspection configuration that selects the relevant fields
-and workflow. The `user_skill` is your request for this call, for example: “Check whether the
-required protective equipment is visible.”
+`safety_inspection` is the user-facing package that makes this set and its workflow ready to use.
+The `user_skill` is your request for this call, for example: “Check whether the required
+protective equipment is visible.”
 
 ![Safety inspection registry object model](output/imagegen/safety-inspection-object-model.png)
 

@@ -6,15 +6,18 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 ## Registry 对象模型
 
 - **Observation**：一个要从图片中检查的视觉事实，例如 `cleanliness` 或 `label_status`。
-- **Observation Set**：面向某个场景的一组 observations，决定 API 返回哪些结构化字段。
-- **Template**：可直接使用的巡检配置，把 observation set 和可重复的巡检流程组合起来。
+- **Observation Set**：registry 中面向某个场景的一组 observations，决定可以一起返回哪些
+  结构化字段。
+- **Template**：用户可以直接选择的完整巡检方案。普通用户可以把它理解为“Observation Set
+  加上可重复使用的巡检流程”；在内部，每个 ready template 都会对应一个版本化的 analyzer
+  配置，用户不需要知道或管理这个内部 ID。
 - **Skill**：用户想完成的巡检目标。普通用户通过 `user_skill` 提供这个目标。
 
 例如，`helmet_status` 是一个 **Observation**，用于检查图片中可见的安全帽状态，可能返回
 `compliant`、`missing` 或 `unknown`。面向安全巡检的 **Observation Set** 可以把
 `helmet_status`、`gloves_status`、`harness_status` 和 `safety_hazard` 组合在一起，让 API
-一次返回这些结构化字段。`safety_inspection` 这样的 **Template** 是可以直接使用的完整巡检
-配置，负责选择相关字段和巡检流程。`user_skill` 则是本次请求想检查的目标，例如“检查图片中
+一次返回这些结构化字段。`safety_inspection` 这样的 **Template** 是把这组字段和巡检流程
+打包成可以直接使用的用户方案。`user_skill` 则是本次请求想检查的目标，例如“检查图片中
 是否能看到必要的个人防护装备”。
 
 ![安全巡检 Registry 对象模型](output/imagegen/safety-inspection-object-model.png)
