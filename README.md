@@ -69,6 +69,13 @@ flowchart LR
   - `visible_quality_issue`: visible damage, dirt, defect, or workmanship issue
   - `text_or_label`: readable text, labels, or signs
   - `overall_condition`: `acceptable`, `needs_attention`, or `unknown`
+- `5s_inspection`: 5S workplace inspection for visible sort, set-in-order, shine, and visual
+  management cues. It does not infer sustained behavior or an unseen site standard from one image.
+  - `unnecessary_items_status`: `none_visible`, `present`, or `unknown`
+  - `work_area_organization`: `orderly`, `disorganized`, or `unknown`
+  - `cleanliness`: `clean`, `dirty`, or `unknown`
+  - `visual_management_status`: `clear`, `unclear`, `not_applicable`, or `unknown`
+  - `five_s_summary`: short 5S finding
 - `safety_inspection`: Workplace safety inspection, especially visible PPE and hazards.
   - `helmet_status`: `compliant`, `missing`, `worn_incorrectly`, `not_applicable`, or `unknown`
   - `gloves_status`: `compliant`, `missing`, `worn_incorrectly`, `not_applicable`, or `unknown`
@@ -160,7 +167,7 @@ For a local image file, use the upload endpoint:
 ```bash
 curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
-  -F 'template_slug=general_inspection' \
+  -F 'template_slug=5s_inspection' \
   -F 'user_skill=Inspect the visible 5S conditions: sort, set in order, shine, standardize, and sustain.'
 ```
 
@@ -175,18 +182,19 @@ The response contains per-image observations and one final finding:
     {
       "index": 1,
       "observations": {
+        "unnecessary_items_status": "present",
+        "work_area_organization": "disorganized",
         "cleanliness": "dirty",
-        "surface_damage": "unknown"
+        "visual_management_status": "unknown",
+        "five_s_summary": "The work area shows visible disorder and insufficient cleanliness."
       }
     }
   ]
 }
 ```
 
-There is currently no dedicated `5s_inspection` template. This approach can provide a 5S
-feedback sentence using `general_inspection`, while structured fields depend on that template.
-To request fixed 5S fields, follow [SKILL.md](SKILL.md) and submit an Issue
-using its field/checkpoint format.
+`5s_inspection` returns fixed 5S fields. It reports only cues visible in the image; use `unknown`
+rather than guessing about sustained behavior or a site standard that was not supplied.
 
 If the image already has an accessible URL, use the template endpoint:
 
@@ -195,7 +203,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-templa
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>"],
-    "template_slug": "general_inspection",
+    "template_slug": "5s_inspection",
     "user_skill": "Inspect the visible 5S workplace-management issues."
   }'
 ```

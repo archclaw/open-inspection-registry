@@ -34,6 +34,13 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
   - `visible_quality_issue`：可见损坏、污渍、缺陷或施工问题
   - `text_or_label`：图片中可读的文字、标签或标牌
   - `overall_condition`：`acceptable`、`needs_attention` 或 `unknown`
+- `5s_inspection`：5S 现场巡检，检查图片中可见的整理、整顿、清扫和可视化管理线索。
+  它不根据单张图片推断长期维持情况，也不假设未提供的现场标准。
+  - `unnecessary_items_status`：`none_visible`、`present` 或 `unknown`
+  - `work_area_organization`：`orderly`、`disorganized` 或 `unknown`
+  - `cleanliness`：`clean`、`dirty` 或 `unknown`
+  - `visual_management_status`：`clear`、`unclear`、`not_applicable` 或 `unknown`
+  - `five_s_summary`：简短的 5S 检查结论
 - `safety_inspection`：安全巡检，重点检查可见的个人防护装备和现场隐患。
   - `helmet_status`：`compliant`、`missing`、`worn_incorrectly`、`not_applicable` 或 `unknown`
   - `gloves_status`：`compliant`、`missing`、`worn_incorrectly`、`not_applicable` 或 `unknown`
@@ -148,7 +155,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-templa
 ```bash
 curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
-  -F 'template_slug=general_inspection' \
+  -F 'template_slug=5s_inspection' \
   -F 'user_skill=检查现场5S：整理、整顿、清扫、清洁和素养，指出图片中可见的问题。'
 ```
 
@@ -163,17 +170,19 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload
     {
       "index": 1,
       "observations": {
+        "unnecessary_items_status": "present",
+        "work_area_organization": "disorganized",
         "cleanliness": "dirty",
-        "surface_damage": "unknown"
+        "visual_management_status": "unknown",
+        "five_s_summary": "工作区域可见物品摆放不整齐和清洁不足的问题。"
       }
     }
   ]
 }
 ```
 
-当前模板列表中还没有专门的 `5s_inspection` 模板。上面的方式先使用 `general_inspection`
-获得 5S 反馈，但返回的结构化字段取决于该模板。如果需要固定的 5S 字段，
-请按照 [SKILL.md](SKILL.md) 提交新的 field/checkpoint Issue，由维护者创建或发布对应模板。
+`5s_inspection` 返回固定的 5S 结构化字段。它只报告图片中可见的线索；对于无法由单张图片
+证明的长期维持情况或未提供的现场标准，结果应为 `unknown`，而不是猜测。
 
 如果图片已经有可访问的 URL，可以使用模板接口：
 
@@ -182,7 +191,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-templa
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>"],
-    "template_slug": "general_inspection",
+    "template_slug": "5s_inspection",
     "user_skill": "检查图片中的5S现场管理问题。"
   }'
 ```
