@@ -15,7 +15,8 @@ request should provide a `user_skill` describing what to inspect.
 
 - An **Observation** is one visual fact to check, such as `cleanliness` or `label_status`.
 - An **Observation Set** is the registry-level group of observations for a use case. It defines
-  which structured fields can be returned together.
+  which structured fields can be returned together. Normal users select a Template instead of an
+  Observation Set.
 - A **Template** is the user-facing, ready-to-use inspection choice. You can think of it as an
   Observation Set packaged with a repeatable workflow. Internally, each ready template maps to a
   versioned analyzer configuration; users do not need to know or manage that internal ID.
@@ -39,8 +40,8 @@ new observation to an existing template. You do not need to publish a template y
 ### First call in three steps
 
 1. Use the service root URL: `https://mcp.azure-api.net/inspection`.
-2. Choose an endpoint: use `analyze-upload` for a local file, `analyze` for image URLs with an
-   observation set, or `analyze-template` for image URLs with a template.
+2. Choose an endpoint: use `analyze-upload` for a local file or `analyze-template` for an image
+   URL. In both cases, provide a ready `template_slug`.
 3. Send a `user_skill` describing what to inspect, then read `inspection_result` and
    `image_results`.
 
@@ -48,12 +49,10 @@ new observation to an existing template. You do not need to publish a template y
 flowchart LR
     A[Image file or image URL] --> B{Choose input}
     B -->|Local file| C[REST analyze-upload]
-    B -->|URL + observation set| D[REST analyze]
-    B -->|URL + template| E[REST analyze-template]
+    B -->|Image URL| D[REST analyze-template]
     B -->|MCP client| F[MCP analyze_inspection]
     C --> G[Inspection service]
     D --> G
-    E --> G
     F --> G
     G --> H[Template + user_skill]
     H --> I[Image evidence analysis]
@@ -101,14 +100,14 @@ This service also does not persist uploaded files in its own local disk or datab
 images unless you have the right to process them and have considered applicable privacy
 requirements.
 
-Analyze one to three images by URL with an observation set:
+Analyze one to three image URLs with a ready template:
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
-    "observation_set": "manufacturing_quality_basic",
+    "template_slug": "quality_inspection",
     "user_skill": "Check visible labels, cleanliness, and surface damage."
   }'
 ```
@@ -118,6 +117,7 @@ Single-image input is also supported:
 ```json
 {
   "image_url": "<IMAGE_URL_1>",
+  "template_slug": "general_inspection",
   "user_skill": "Check whether the warehouse label is present and readable."
 }
 ```
@@ -132,8 +132,8 @@ To select a ready template, use `/v1/inspections:analyze-template`:
 }
 ```
 
-For local image files, use `/v1/inspections:analyze-upload` with one to three `files` fields
-and an `observation_set`. The request must include a `user_skill`.
+For local image files, use `/v1/inspections:analyze-upload` with one to three `files` fields, a
+ready `template_slug`, and a `user_skill`.
 
 For a first request, use a `user_skill` to describe the inspection goal.
 
@@ -142,12 +142,10 @@ Public REST endpoints:
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `GET` | `/healthz` | Service health check |
-| `GET` | `/v1/registry/observation-sets` | List built-in observation sets |
 | `GET` | `/v1/templates` | List ready templates |
 | `GET` | `/v1/templates/{slug}` | Read one template |
-| `POST` | `/v1/inspections:analyze` | Analyze image URLs with an observation set |
 | `POST` | `/v1/inspections:analyze-template` | Analyze image URLs with a template |
-| `POST` | `/v1/inspections:analyze-upload` | Analyze uploaded image files |
+| `POST` | `/v1/inspections:analyze-upload` | Analyze uploaded image files with a template |
 
 ### Example: 5S inspection
 
@@ -162,7 +160,7 @@ For a local image file, use the upload endpoint:
 ```bash
 curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
-  -F 'observation_set=manufacturing_quality_basic' \
+  -F 'template_slug=general_inspection' \
   -F 'user_skill=Inspect the visible 5S conditions: sort, set in order, shine, standardize, and sustain.'
 ```
 
@@ -186,8 +184,8 @@ The response contains per-image observations and one final finding:
 ```
 
 There is currently no dedicated `5s_inspection` template. This approach can provide a 5S
-feedback sentence using a free-form skill, while structured fields depend on the selected
-observation set. To request fixed 5S fields, follow [SKILL.md](SKILL.md) and submit an Issue
+feedback sentence using `general_inspection`, while structured fields depend on that template.
+To request fixed 5S fields, follow [SKILL.md](SKILL.md) and submit an Issue
 using its field/checkpoint format.
 
 If the image already has an accessible URL, use the template endpoint:
@@ -206,7 +204,6 @@ Use this quick guide:
 
 - Local image file: `/v1/inspections:analyze-upload`
 - Image URL with a template: `/v1/inspections:analyze-template`
-- Image URL with an observation set: `/v1/inspections:analyze`
 - MCP client: call `analyze_inspection`
 
 ### MCP

@@ -7,7 +7,7 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 
 - **Observation**：一个要从图片中检查的视觉事实，例如 `cleanliness` 或 `label_status`。
 - **Observation Set**：registry 中面向某个场景的一组 observations，决定可以一起返回哪些
-  结构化字段。
+  结构化字段。普通用户选择 Template，不需要选择 Observation Set。
 - **Template**：用户可以直接选择的完整巡检方案。普通用户可以把它理解为“Observation Set
   加上可重复使用的巡检流程”；在内部，每个 ready template 都会对应一个版本化的 analyzer
   配置，用户不需要知道或管理这个内部 ID。
@@ -62,14 +62,14 @@ Inspection Agent Engine 后端服务会在图片处理完成后删除上传的�
 本服务自身也不会把上传文件持久化到本地磁盘或数据库。请确认你有权处理图片，并根据适用
 的隐私要求决定是否上传。
 
-服务一次接受一到三张图片。图片可以通过 URL 或 Base64 内容发送。巡检意图可以使用已经
-巡检意图使用 `user_skill` 字段提供巡检目标。
+服务一次接受一到三张图片。图片可以通过 URL 或 Base64 内容发送。巡检意图使用
+`user_skill` 字段提供巡检目标。
 
 ## 第一次调用：只需要三步
 
 1. 使用服务根地址 `https://mcp.azure-api.net/inspection`。
-2. 选择接口：本地文件使用 `analyze-upload`，图片 URL 加 observation set 使用 `analyze`，
-   图片 URL 加模板使用 `analyze-template`。
+2. 选择接口：本地文件使用 `analyze-upload`，图片 URL 使用 `analyze-template`；两种方式都
+   提供 ready 的 `template_slug`。
 3. 使用 `user_skill` 描述要检查什么，然后读取返回结果中的 `inspection_result` 和
    `image_results`。
 
@@ -77,12 +77,10 @@ Inspection Agent Engine 后端服务会在图片处理完成后删除上传的�
 flowchart LR
     A[本地图片或图片 URL] --> B{选择输入方式}
     B -->|本地文件| C[REST analyze-upload]
-    B -->|URL + observation set| D[REST analyze]
-    B -->|URL + 模板| E[REST analyze-template]
+    B -->|图片 URL| D[REST analyze-template]
     B -->|MCP 客户端| F[MCP analyze_inspection]
     C --> G[巡检服务]
     D --> G
-    E --> G
     F --> G
     G --> H[模板 + user_skill]
     H --> I[图片证据分析]
@@ -90,14 +88,14 @@ flowchart LR
     J --> K[一句最终 finding]
 ```
 
-通过图片 URL 和 observation set 分析一到三张图片：
+通过 ready template 分析一到三张图片 URL：
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
+curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
-    "observation_set": "manufacturing_quality_basic",
+    "template_slug": "quality_inspection",
     "user_skill": "检查可见的标签、清洁度和表面损坏。"
   }'
 ```
@@ -107,6 +105,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
 ```json
 {
   "image_url": "<IMAGE_URL_1>",
+  "template_slug": "general_inspection",
   "user_skill": "检查仓库物料标签是否存在并且清晰可读。"
 }
 ```
@@ -121,8 +120,8 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
 }
 ```
 
-本地图片文件可以使用 `/v1/inspections:analyze-upload`，提交一到三个 `files` 字段和
-`observation_set`。请求必须提供 `user_skill`。
+本地图片文件可以使用 `/v1/inspections:analyze-upload`，提交一到三个 `files` 字段、ready
+的 `template_slug` 和 `user_skill`。
 
 第一次调用请使用 `user_skill` 描述巡检目标。
 
@@ -131,12 +130,10 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
 | 方法 | 路径 | 用途 |
 | --- | --- | --- |
 | `GET` | `/healthz` | 健康检查 |
-| `GET` | `/v1/registry/observation-sets` | 读取内置 observation set |
 | `GET` | `/v1/templates` | 读取可用模板列表 |
 | `GET` | `/v1/templates/{slug}` | 读取单个模板 |
-| `POST` | `/v1/inspections:analyze` | 使用 observation set 分析图片 URL |
 | `POST` | `/v1/inspections:analyze-template` | 使用模板分析图片 URL |
-| `POST` | `/v1/inspections:analyze-upload` | 分析上传的图片文件 |
+| `POST` | `/v1/inspections:analyze-upload` | 使用模板分析上传的图片文件 |
 
 ## 示例：5S 现场巡检
 
@@ -151,7 +148,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze' \
 ```bash
 curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
-  -F 'observation_set=manufacturing_quality_basic' \
+  -F 'template_slug=general_inspection' \
   -F 'user_skill=检查现场5S：整理、整顿、清扫、清洁和素养，指出图片中可见的问题。'
 ```
 
@@ -174,8 +171,8 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload
 }
 ```
 
-当前模板列表中还没有专门的 `5s_inspection` 模板。上面的方式可以先使用自由文本获得
-5S 反馈，但返回的结构化字段取决于所选 `observation_set`。如果需要固定的 5S 字段，
+当前模板列表中还没有专门的 `5s_inspection` 模板。上面的方式先使用 `general_inspection`
+获得 5S 反馈，但返回的结构化字段取决于该模板。如果需要固定的 5S 字段，
 请按照 [SKILL.md](SKILL.md) 提交新的 field/checkpoint Issue，由维护者创建或发布对应模板。
 
 如果图片已经有可访问的 URL，可以使用模板接口：
@@ -194,7 +191,6 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-templa
 
 - 本地图片文件：使用 `/v1/inspections:analyze-upload`
 - 图片 URL + 模板：使用 `/v1/inspections:analyze-template`
-- 图片 URL + observation set：使用 `/v1/inspections:analyze`
 - MCP 客户端：调用 `analyze_inspection`
 
 ## MCP
