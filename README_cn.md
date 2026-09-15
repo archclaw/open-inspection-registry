@@ -58,7 +58,7 @@ Open Inspection API 或 MCP 服务发送图片和巡检意图，并获得基于�
 
 ## REST API
 
-示例使用服务根地址 `https://mcp.azure-api.net/inspection`。不要在公开仓库中加入 API key、
+示例使用服务根地址 `https://skill.azure-api.net/inspection`。不要在公开仓库中加入 API key、
 SAS URL、私人图片 URL 或生产环境凭据。
 
 ## 图片安全与保留
@@ -74,7 +74,7 @@ Inspection Agent Engine 后端服务会在图片处理完成后删除上传的�
 
 ## 第一次调用：只需要三步
 
-1. 使用服务根地址 `https://mcp.azure-api.net/inspection`。
+1. 使用服务根地址 `https://skill.azure-api.net/inspection`。
 2. 选择接口：本地文件使用 `analyze-upload`，图片 URL 使用 `analyze-template`；两种方式都
    提供 ready 的 `template_slug`。
 3. 使用 `user_skill` 描述要检查什么，然后读取返回结果中的 `inspection_result` 和
@@ -98,7 +98,7 @@ flowchart LR
 通过 ready template 分析一到三张图片 URL：
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
+curl -X POST 'https://skill.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
@@ -153,7 +153,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-templa
 使用上传接口发送图片。这个接口适合本地图片文件：
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
+curl -X POST 'https://skill.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
   -F 'template_slug=5s_inspection' \
   -F 'user_skill=检查现场5S：整理、整顿、清扫、清洁和素养，指出图片中可见的问题。'
@@ -187,7 +187,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload
 如果图片已经有可访问的 URL，可以使用模板接口：
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
+curl -X POST 'https://skill.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>"],
@@ -207,7 +207,7 @@ curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-templa
 Streamable HTTP MCP 地址为：
 
 ```text
-https://mcp.azure-api.net/inspection/mcp/
+https://skill.azure-api.net/inspection/mcp/
 ```
 
 MCP tool 名称为 `analyze_inspection`：

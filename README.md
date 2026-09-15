@@ -39,7 +39,7 @@ new observation to an existing template. You do not need to publish a template y
 
 ### First call in three steps
 
-1. Use the service root URL: `https://mcp.azure-api.net/inspection`.
+1. Use the service root URL: `https://skill.azure-api.net/inspection`.
 2. Choose an endpoint: use `analyze-upload` for a local file or `analyze-template` for an image
    URL. In both cases, provide a ready `template_slug`.
 3. Send a `user_skill` describing what to inspect, then read `inspection_result` and
@@ -94,7 +94,7 @@ general inspection template.
 
 ### REST API
 
-The examples use the service root URL `https://mcp.azure-api.net/inspection`. Never add API keys,
+The examples use the service root URL `https://skill.azure-api.net/inspection`. Never add API keys,
 SAS URLs, private image URLs, or production credentials to this repository.
 
 ### Image privacy and retention
@@ -110,7 +110,7 @@ requirements.
 Analyze one to three image URLs with a ready template:
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
+curl -X POST 'https://skill.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>", "<IMAGE_URL_2>"],
@@ -165,7 +165,7 @@ Suppose you have a local image:
 For a local image file, use the upload endpoint:
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-upload' \
+curl -X POST 'https://skill.azure-api.net/inspection/v1/inspections:analyze-upload' \
   -F 'files=@./images/work-area.jpg' \
   -F 'template_slug=5s_inspection' \
   -F 'user_skill=Inspect the visible 5S conditions: sort, set in order, shine, standardize, and sustain.'
@@ -199,7 +199,7 @@ rather than guessing about sustained behavior or a site standard that was not su
 If the image already has an accessible URL, use the template endpoint:
 
 ```bash
-curl -X POST 'https://mcp.azure-api.net/inspection/v1/inspections:analyze-template' \
+curl -X POST 'https://skill.azure-api.net/inspection/v1/inspections:analyze-template' \
   -H 'Content-Type: application/json' \
   -d '{
     "image_urls": ["<IMAGE_URL_1>"],
@@ -219,7 +219,7 @@ Use this quick guide:
 The Streamable HTTP MCP endpoint is:
 
 ```text
-https://mcp.azure-api.net/inspection/mcp/
+https://skill.azure-api.net/inspection/mcp/
 ```
 
 The MCP tool is `analyze_inspection`:
